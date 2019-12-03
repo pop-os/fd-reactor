@@ -1,0 +1,18 @@
+[package]
+name = "fd-reactor"
+version = "0.1.0"
+authors = ["Michael Aaron Murphy <mmstick@pm.me>"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+edition = "2018"
+repository = "https://github.com/pop-os/fd-reactor"
+description = """
+An async reactor for handling file descriptors
+"""
+keywords = ["reactor", "fd", "file", "descriptor"]
+categories = ["asynchronous", "os::unix-apis"]
+
+[dependencies]
+libc = "0.2"
+once_cell = "1"
+bitflags = "1"
