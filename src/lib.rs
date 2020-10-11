@@ -1,10 +1,14 @@
 //! A reactor for handling file descriptors in a background thread.
+//! See also `FdFuture` for high-level API.
 //!
 //! ## Implementation Notes
 //!
 //! - The reactor's background thread is spawned on the first time that the reactor handle is fetched.
 //! - Each file descriptor registers an interest to listen for.
 //! - On registering a new file descriptor, a pipe is used to interrupt the poll operation.
+
+mod future;
+pub use future::FdFuture;
 
 use once_cell::sync::Lazy;
 use std::{
@@ -46,6 +50,9 @@ pub struct Handle {
 
 impl Handle {
     /// Register a new file descriptor onto the reactor.
+    /// When `fd` is ready with respect to `interest`,
+    /// reactor will store `true` into the `completed`.
+    /// You should use `Acquire` ordering when reading from `completed`.
     pub fn register(
         &self,
         fd: RawFd,
@@ -117,7 +124,7 @@ pub static REACTOR: Lazy<Handle> = Lazy::new(|| {
                                 .0
                                 .contains(Interest::from_bits_truncate(event.revents))
                             {
-                                value.1.store(true, Ordering::SeqCst);
+                                value.1.store(true, Ordering::Release);
                                 value.2.wake_by_ref();
                             }
                         }
